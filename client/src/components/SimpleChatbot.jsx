@@ -4,7 +4,7 @@ import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export const SimpleChatbot = () => {
+const SimpleChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -114,3 +114,5 @@ export const SimpleChatbot = () => {
     </>
   );
 };
+
+export default SimpleChatbot;

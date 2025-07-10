@@ -1,11 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "./contexts/ThemeContext.tsx";
-import { Navbar } from "./components/Navbar.tsx";
-import { SimpleChatbot } from "./components/SimpleChatbot.tsx";
+import { Routes, Route, useParams, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import Medicines from "./pages/Medicines.jsx";
@@ -14,33 +7,27 @@ import Login from "./pages/Login.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Profile from "./pages/Profile.jsx";
 import Diseases from "./pages/Diseases.jsx";
+import SimpleChatbot from "./components/SimpleChatbot.jsx";
+import Navbar from "./components/Navbar.jsx";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen bg-black text-white transition-colors duration-300">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/medicines" element={<Medicines />} />
-              <Route path="/diseases" element={<Diseases />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <SimpleChatbot />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const { pathname } = useLocation();
+  const path = pathname.split("/")[1];
+  return (
+    <div className="min-h-screen bg-black text-white transition-colors duration-300">
+      {path !== "login" && path !== "signup" && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/medicines" element={<Medicines />} />
+        <Route path="/diseases" element={<Diseases />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <SimpleChatbot />
+    </div>
+  );
+};
 
 export default App;
