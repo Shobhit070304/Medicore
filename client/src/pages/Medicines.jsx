@@ -1,12 +1,40 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Search, Pill, AlertTriangle, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { medicines } from "@/Content/data.js"; // Adjust the path as necessary
+// import { medicines } from "@/Content/data.js"; // Adjust the path as necessary
+import axios from "axios";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { Link } from 'react-router-dom';
+import { useAuth } from "../context/UserContext"
 
 const Medicines = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [medicines, setMedicines] = useState([]);
+  const { user } = useAuth();
+  async function fetchMedicines() {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/medicines/all`
+      );
+
+      if (res.status === 200) {
+        setMedicines(res.data);
+        toast.success("Medicines fetched successfully");
+      }
+      else {
+        toast.error("Error fetching medicines");
+      }
+    } catch (error) {
+      toast.error("Error fetching medicines");
+    }
+  }
+
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
 
   const filteredMedicines = medicines.filter(
     (medicine) =>
@@ -41,95 +69,67 @@ const Medicines = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredMedicines.map((medicine, index) => (
-            <Card
-              key={index}
-              className="glass-card border border-white/10 hover:border-white/20 transition-transform duration-300 hover:scale-[1.015] group shadow-md rounded-xl p-4 w-full max-w-xl"
-            >
-              {/* Header Section */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-md gradient-primary flex items-center justify-center group-hover:animate-glow">
-                    <Pill className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-white text-lg font-semibold">
-                      {medicine.name}
-                    </h3>
-                    <Badge
-                      variant="default"
-                      className="bg-white/10 text-gray-300 border border-white/20 text-xs px-2 py-0.5"
-                    >
-                      {medicine.type}
-                    </Badge>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {filteredMedicines.map((medicine, index) => {
+            const usesToShow = medicine.uses.slice(0, 2);
+            const usesMore = medicine.uses.length - usesToShow.length;
+            const desc = medicine.description || '';
+            const descShort = desc.length > 80 ? desc.slice(0, 80) + '…' : desc;
+            return (
+              <div
+                key={index}
+                className="relative flex items-center px-4 py-3 bg-white/5 backdrop-blur border border-white/10 rounded-lg shadow-md transition-all duration-300 group hover:shadow-xl hover:border-purple-400/60 hover:bg-white/10 focus-within:border-purple-400/80 focus-within:shadow-xl min-h-[110px]"
+                tabIndex={0}
+              >
+                {/* Left Icon */}
+                <div className="flex-shrink-0 mr-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/60 to-purple-900/60 flex items-center justify-center shadow group-hover:scale-105 group-hover:shadow-lg transition-transform">
+                    <Pill className="h-5 w-5 text-white drop-shadow" />
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-base font-bold gradient-text">
-                    {medicine.price}
-                  </p>
-                  <p className="text-xs text-gray-400">{medicine.dosage}</p>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-sm text-gray-300 mb-4">
-                {medicine.description}
-              </p>
-
-              {/* Uses */}
-              <div className="mb-4">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Info className="h-4 w-4 text-green-400" />
-                  <h4 className="text-sm font-semibold text-white">Uses</h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {medicine.uses.map((use, i) => (
-                    <Badge
-                      key={i}
-                      variant="outline"
-                      className="text-[10px] bg-green-500/10 text-green-400 border-green-500/20 px-2 py-0.5"
-                    >
-                      {use}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Side Effects */}
-                <div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                    <h4 className="text-sm font-semibold text-white">
-                      Side Effects
-                    </h4>
+                {/* Main Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="text-white text-base font-semibold truncate max-w-[120px]">{medicine.name}</h3>
+                    <Badge variant="default" className="bg-purple-500/20 text-purple-200 border-none text-[11px] px-2 py-0.5 rounded-full font-semibold">{medicine.type}</Badge>
                   </div>
-                  <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
-                    {medicine.sideEffects.slice(0, 3).map((effect, i) => (
-                      <li key={i}>{effect}</li>
+                  <div className="flex items-center gap-3 mb-0.5">
+                    <span className="text-sm font-bold text-purple-300">{medicine.price}</span>
+                    <span className="text-xs text-gray-400">{medicine.dosage}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mb-1">
+                    {usesToShow.map((use, i) => (
+                      <Badge
+                        key={i}
+                        variant="outline"
+                        className="text-[10px] bg-green-500/10 text-green-300 border-green-500/20 px-1.5 py-0.5 rounded-full"
+                      >
+                        {use}
+                      </Badge>
                     ))}
-                  </ul>
-                </div>
-
-                {/* Precautions */}
-                <div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-red-400" />
-                    <h4 className="text-sm font-semibold text-white">
-                      Precautions
-                    </h4>
+                    {usesMore > 0 && (
+                      <span className="text-[10px] text-gray-400">+{usesMore} more</span>
+                    )}
                   </div>
-                  <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
-                    {medicine.precautions.slice(0, 2).map((precaution, i) => (
-                      <li key={i}>{precaution}</li>
-                    ))}
-                  </ul>
+                  <div className="text-xs text-gray-300/90 mb-0.5">
+                    {descShort}
+                  </div>
+                </div>
+                {/* More Details Link */}
+                <div className="ml-4 flex-shrink-0 self-start">
+                  <Link
+                    to={user ? `/medicines/${medicine._id}` : `/auth`}
+                    className="inline-flex items-center text-purple-300 hover:text-white focus:text-white underline-offset-4 hover:underline focus:underline font-semibold transition group text-xs"
+                    tabIndex={0}
+                    aria-label={`View more details about ${medicine.name}`}
+                  >
+                    <span className="hidden sm:inline">More Details</span>
+                    <svg className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </Link>
                 </div>
               </div>
-            </Card>
-          ))}
+            );
+          })}
         </div>
 
         {filteredMedicines.length === 0 && (

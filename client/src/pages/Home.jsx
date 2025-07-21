@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { features, stats, benefits, testimonials } from "@/Content/data";
+import axios from "axios";
+import React from "react";
 
 const Home = () => {
   return (

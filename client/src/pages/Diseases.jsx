@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Upload,
   Camera,
@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const Diseases = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -25,34 +27,35 @@ const Diseases = () => {
   };
 
   const handleSubmit = async () => {
+    if (!symptoms) {
+      toast.warn("Please enter symptoms or upload an image.");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      setAiResponse({
-        diagnosis: "Common Cold",
-        confidence: "85%",
-        symptoms: ["Runny nose", "Cough", "Sore throat"],
-        recommendations: [
-          {
-            medicine: "Paracetamol",
-            dosage: "500mg every 6 hours",
-            duration: "3-5 days",
+    try {
+      const formData = new FormData();
+      formData.append("symptoms", symptoms);
+      formData.append("image", image);
+      let token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/disease/diagnose`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
-          {
-            medicine: "Cough Syrup",
-            dosage: "10ml twice daily",
-            duration: "5 days",
-          },
-        ],
-        precautions: [
-          "Rest well",
-          "Drink plenty of fluids",
-          "Avoid cold foods",
-        ],
-      });
+        }
+      );
+      setAiResponse(res.data.res); // the structured AI response from backend
+    } catch (error) {
+      alert("Failed to get diagnosis. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -208,6 +211,22 @@ const Diseases = () => {
                       >
                         <span className="w-1 h-1 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                         {precaution}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="glass-card bg-white/5 rounded-xl p-4">
+                  <h3 className="font-semibold text-white mb-3 text-sm">
+                    Symptoms
+                  </h3>
+                  <ul className="space-y-2">
+                    {aiResponse.symptoms.map((symptom, index) => (
+                      <li
+                        key={index}
+                        className="text-xs text-gray-400 flex items-start"
+                      >
+                        <span className="w-1 h-1 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        {symptom}
                       </li>
                     ))}
                   </ul>

@@ -1,9 +1,26 @@
-require("dotenv").config();
-const express = require("express");
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import connectDB from "./db/db.js";
+
+import rateLimit from "express-rate-limit";
+
+// Import routes
+import userRoutes from "./routes/user-routes.js";
+import diseaseRoutes from "./routes/disease-routes.js";
+import medicineRoutes from "./routes/medicine-routes.js";
+import chatbotRoutes from "./routes/chatbot-routes.js";
+
 const app = express();
-const cors = require("cors");
-const connectDB = require("./db/db.js");
-const rateLimit = require("express-rate-limit");
+
+//Middleware
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -15,20 +32,16 @@ app.use(limiter);
 // Connect to MongoDB
 connectDB();
 
-//Routes
-
-//Middleware
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-  })
-);
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello from Backend");
+app.get("/api/", (req, res) => {
+  res.status(200).json({ msg: "Hello from Backend" });
 });
+app.use("/api/user", userRoutes);
+app.use("/api/disease", diseaseRoutes);
+app.use("/api/medicines", medicineRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 
-module.exports = app;
+export default app;

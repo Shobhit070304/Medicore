@@ -1,12 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/UserContext.jsx";
 
 const Navbar = () => {
-  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-
+  
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  
+  const randomSeed = user?.name + Math.floor(Math.random() * 10000);
+  const avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${randomSeed}`;
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -14,13 +20,21 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Medicines", href: "/medicines" },
     { name: "Diseases", href: "/diseases" },
     { name: "Profile", href: "/profile" },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white text-lg">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <nav
@@ -63,12 +77,22 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Link to="/login">
-                <Button className="gradient-primary hover:opacity-90 transition-all duration-300 rounded-full px-6">
-                  <User className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
-              </Link>
+              {user ? (
+                <Link to="/auth">
+                  <img
+                    src={avatar}
+                    alt="User Avatar"
+                    className="w-10 h-10 rounded-full border-2 border-indigo-500"
+                  />
+                </Link>
+              ) : (
+                <Link to="/auth">
+                  <Button className="gradient-primary hover:opacity-90 transition-all duration-300 rounded-full px-6">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

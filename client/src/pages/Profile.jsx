@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -24,6 +26,56 @@ const Profile = () => {
     allergies: ["Peanuts", "Dust"],
     conditions: ["Hypertension"],
   });
+
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/user/profile/get`,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const userData = res.data.user;
+      setProfile({
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        age: userData.age,
+        bloodGroup: userData.bloodGroup,
+        allergies: userData.allergies,
+        conditions: userData.conditions,
+      });
+    } catch (error) {
+      toast.error("Fething user profile failed");
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const saveInfo = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/user/profile/set`,
+        profile,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Profile updated successfully");
+      fetchUser();
+    } catch (error) {
+      toast.error("Failed to update profile");
+    }
+  };
 
   const consultationHistory = [
     { date: "2024-01-15", condition: "Common Cold", status: "Completed" },
@@ -60,7 +112,12 @@ const Profile = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => {
+                    setIsEditing(!isEditing);
+                    if (isEditing == true) {
+                      saveInfo();
+                    }
+                  }}
                   className="glass-button border-white/20 text-white hover:bg-white/10 text-xs"
                 >
                   <Edit className="h-3 w-3 mr-2" />
@@ -98,19 +155,9 @@ const Profile = () => {
                     </label>
                     <div className="flex items-center">
                       <Mail className="h-4 w-4 text-gray-500 mr-2" />
-                      {isEditing ? (
-                        <Input
-                          value={profile.email}
-                          onChange={(e) =>
-                            setProfile({ ...profile, email: e.target.value })
-                          }
-                          className="glass-card bg-white/5 border-white/10 text-white text-sm"
-                        />
-                      ) : (
-                        <span className="text-white text-sm">
-                          {profile.email}
-                        </span>
-                      )}
+                      <span className="text-white text-sm">
+                        {profile.email}
+                      </span>
                     </div>
                   </div>
 
@@ -165,9 +212,22 @@ const Profile = () => {
                   </label>
                   <div className="flex items-center">
                     <Heart className="h-4 w-4 text-red-400 mr-2" />
-                    <Badge className="gradient-secondary text-white text-xs">
+                    {/* <Badge className="gradient-secondary text-white text-xs">
                       {profile.bloodGroup}
-                    </Badge>
+                    </Badge> */}
+                    {isEditing ? (
+                      <Input
+                        value={profile.bloodGroup}
+                        onChange={(e) =>
+                          setProfile({ ...profile, bloodGroup: e.target.value })
+                        }
+                        className="glass-card bg-white/5 border-white/10 text-white text-sm"
+                      />
+                    ) : (
+                      <span className="text-white text-sm">
+                        {profile.bloodGroup}
+                      </span>
+                    )}
                   </div>
                 </div>
 
