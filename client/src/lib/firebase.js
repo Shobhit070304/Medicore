@@ -1,14 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
+console.log("Data -> ",process.env)
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDnQKRmMRbkpBNZn641XrYUY0rd_VUBaK4",
-  authDomain: "medicore-6103b.firebaseapp.com",
-  projectId: "medicore-6103b",
-  storageBucket: "medicore-6103b.firebasestorage.app",
-  messagingSenderId: "967863134047",
-  appId: "1:967863134047:web:4264c1dcc4879434f238ea",
-  measurementId: "G-8NVB659P9Q",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
