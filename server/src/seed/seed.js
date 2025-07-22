@@ -821,14 +821,12 @@ const medicines = [
 
 async function SeedData() {
   await mongoose
-    .connect("mongodb://localhost:27017/medicore", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    .connect(process.env.MONGO_URI)
     .then(async () => {
       await Medicine.deleteMany();
       await Medicine.insertMany(medicines);
       mongoose.disconnect();
+      console.log("Database seeded ✅")
     })
     .catch((err) => {
       // console.error(err); // Removed console.error
