@@ -8,7 +8,7 @@ const Auth = () => {
   const { login, logout } = useAuth();
   const navigate = useNavigate();
 
-  const { user, leading } = useAuth();
+  const { user, loading } = useAuth();
 
   const loginWithGoogle = async () => {
     try {
